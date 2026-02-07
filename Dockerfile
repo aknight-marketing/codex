@@ -1,5 +1,5 @@
-with:
-  context: .
-  file: docker/Dockerfile
-  push: true
-  tags: ${{ secrets.DOCKERHUB_USERNAME }}/YOUR_REPO_NAME:latest
+FROM nginx:alpine
+COPY . /usr/share/nginx/html
+
+# Optional: if you ever add a custom nginx config, you'd copy it here.
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
