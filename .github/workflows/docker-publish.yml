@@ -26,4 +26,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aknightmarketing/codex-build:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/aknight-marketing:latest
