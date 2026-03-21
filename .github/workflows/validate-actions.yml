@@ -1,0 +1,20 @@
+name: Validate GitHub Actions Workflows
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - work
+      - 'codex/**'
+
+permissions:
+  contents: read
+
+jobs:
+  validate-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Validate workflow YAML and duplicate keys
+        run: ruby scripts/validate_workflows.rb
