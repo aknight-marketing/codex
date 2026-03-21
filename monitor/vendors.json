@@ -6,7 +6,6 @@
   },
   "test_mode": {
     "fixture_path": "monitor/fixtures/test_pages.json"
-    "timeout_ms": 30000
   },
   "watchlist_vendors": [
     "apple_refurb_uk",
@@ -15,7 +14,6 @@
     "back_market_uk",
     "cex",
     "musicmagpie"
-    "cex"
   ],
   "vendors": [
     {
@@ -33,18 +31,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 25,
       "defaults": {"warranty": "1 year Apple warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "apple.com"
-      ],
-      "search_queries": [
-        "site:apple.com/uk/shop/product \"refurbished 14-inch macbook pro\" \"Apple (UK)\""
-      ],
-      "trust_score": 25,
-      "defaults": {
-        "warranty": "1 year Apple warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Apple certified refurbished; strongest trust, but often pricey."
     },
     {
@@ -61,19 +47,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 21,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "macfinder.co.uk"
-      ],
-      "search_queries": [
-        "site:macfinder.co.uk \"MacBook Pro 14-inch\" \"M3 Max\" \"macfinder\"",
-        "site:macfinder.co.uk \"MacBook Pro 14-inch\" \"M2 Max\" \"macfinder\""
-      ],
-      "trust_score": 21,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Specialist UK Apple refurbisher with clear keyboard notes."
     },
     {
@@ -87,19 +60,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 19,
       "defaults": {"warranty": "1 year warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "hoxtonmacs.co.uk"
-      ],
-      "search_queries": [
-        "site:hoxtonmacs.co.uk \"MacBook Pro 14\" \"M3 Max\"",
-        "site:hoxtonmacs.co.uk \"MacBook Pro 14\" \"M2 Max\""
-      ],
-      "trust_score": 19,
-      "defaults": {
-        "warranty": "1 year warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Specialist refurbisher; quality generally good, but price varies."
     },
     {
@@ -113,18 +73,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 16,
       "defaults": {"warranty": "12 month warranty", "returns": "30-day returns"},
-      "domains": [
-        "backmarket.co.uk"
-      ],
-      "search_queries": [
-        "site:backmarket.co.uk/en-gb \"MacBook Pro 14\" \"M3 Max\"",
-        "site:backmarket.co.uk/en-gb \"MacBook Pro 14\" \"M2 Max\""
-      ],
-      "trust_score": 16,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "30-day returns"
-      },
       "notes": "Marketplace model; trust depends on refurbisher, but buyer protections are decent."
     },
     {
@@ -138,19 +86,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 15,
       "defaults": {"warranty": "24 month warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "uk.webuy.com"
-      ],
-      "search_queries": [
-        "site:uk.webuy.com \"MacBook Pro 14\" \"M3 Max\"",
-        "site:uk.webuy.com \"MacBook Pro 14\" \"M2 Max\""
-      ],
-      "trust_score": 15,
-      "defaults": {
-        "warranty": "24 month warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Strong warranty, but grading and battery quality can vary."
     },
     {
@@ -164,17 +99,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 15,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns"},
-      "domains": [
-        "musicmagpie.co.uk"
-      ],
-      "search_queries": [
-        "site:musicmagpie.co.uk \"MacBook Pro 14\" refurbished"
-      ],
-      "trust_score": 15,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns"
-      },
       "notes": "Large refurbisher; good policies, but high-spec stock can be sporadic."
     },
     {
@@ -186,17 +110,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 16,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns"},
-      "domains": [
-        "mresell.co.uk"
-      ],
-      "search_queries": [
-        "site:mresell.co.uk \"MacBook Pro 14\" refurbished"
-      ],
-      "trust_score": 16,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns"
-      },
       "notes": "Apple-focused reseller; verify keyboard and shipping specifics."
     },
     {
@@ -208,18 +121,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 18,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "krcs.co.uk"
-      ],
-      "search_queries": [
-        "site:krcs.co.uk \"MacBook Pro 14\" ex-demo"
-      ],
-      "trust_score": 18,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Authorised reseller; ex-demo stock can be attractive if priced sharply."
     },
     {
@@ -231,19 +132,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 14,
       "defaults": {"warranty": "Amazon Renewed Guarantee", "returns": "Amazon returns policy", "keyboard_layout": "UK"},
-      "domains": [
-        "amazon.co.uk"
-      ],
-      "search_queries": [
-        "site:amazon.co.uk \"Renewed\" \"MacBook Pro 14\" \"M3 Max\"",
-        "site:amazon.co.uk \"Renewed\" \"MacBook Pro 14\" \"M2 Max\""
-      ],
-      "trust_score": 14,
-      "defaults": {
-        "warranty": "Amazon Renewed Guarantee",
-        "returns": "Amazon returns policy",
-        "keyboard_layout": "UK"
-      },
       "notes": "Huge inventory but listing consistency varies."
     },
     {
@@ -255,18 +143,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 14,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns", "keyboard_layout": "UK"},
-      "domains": [
-        "laptopsdirect.co.uk"
-      ],
-      "search_queries": [
-        "site:laptopsdirect.co.uk refurbished \"MacBook Pro 14\""
-      ],
-      "trust_score": 14,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns",
-        "keyboard_layout": "UK"
-      },
       "notes": "Useful for broader fallback stock."
     },
     {
@@ -278,17 +154,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 13,
       "defaults": {"warranty": "12 month warranty", "returns": "14-day returns"},
-      "domains": [
-        "theioutlet.com"
-      ],
-      "search_queries": [
-        "site:theioutlet.com \"MacBook Pro 14\""
-      ],
-      "trust_score": 13,
-      "defaults": {
-        "warranty": "12 month warranty",
-        "returns": "14-day returns"
-      },
       "notes": "Variable but worth scanning for value."
     },
     {
@@ -300,18 +165,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 15,
       "defaults": {"warranty": "Check listing", "returns": "Check listing", "keyboard_layout": "UK"},
-      "domains": [
-        "accomputerwarehouse.com"
-      ],
-      "search_queries": [
-        "site:accomputerwarehouse.com \"MacBook Pro 14\""
-      ],
-      "trust_score": 15,
-      "defaults": {
-        "warranty": "Check listing",
-        "returns": "Check listing",
-        "keyboard_layout": "UK"
-      },
       "notes": "Local Greater Manchester option; can be convenient for pickup."
     },
     {
@@ -323,18 +176,6 @@
       "required_terms": ["macbook", "pro", "14"],
       "trust_score": 15,
       "defaults": {"warranty": "Check listing", "returns": "Check listing", "keyboard_layout": "UK"},
-      "domains": [
-        "cheshiremacs.com"
-      ],
-      "search_queries": [
-        "site:cheshiremacs.com \"MacBook Pro 14\""
-      ],
-      "trust_score": 15,
-      "defaults": {
-        "warranty": "Check listing",
-        "returns": "Check listing",
-        "keyboard_layout": "UK"
-      },
       "notes": "Regional Apple refurb specialist."
     },
     {
@@ -349,21 +190,4 @@
       "notes": "Smaller reseller; check stock and spec text carefully."
     }
   ]
-}
-      "domains": [
-        "affordablemac.co.uk"
-      ],
-      "search_queries": [
-        "site:affordablemac.co.uk \"MacBook Pro 14\""
-      ],
-      "trust_score": 13,
-      "defaults": {
-        "warranty": "Check listing",
-        "returns": "Check listing",
-        "keyboard_layout": "UK"
-      },
-      "notes": "Smaller reseller; check stock and spec text carefully."
-    }
-  ],
-  "offline_snapshot_path": "monitor/fixtures/offline_pages.json"
 }
