@@ -31,6 +31,22 @@ class Listing:
     rationale: str | None = None
     source_url: str | None = None
     availability_text: str | None = None
+    stock_evidence: str | None = None
+    review_reason: str | None = None
+    raw: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+@dataclass
+class MonitorResult:
+    generated_at: str
+    mode: str
+    shortlist: list[Listing]
+    needs_review: list[Listing]
+    vendor_errors: list[dict[str, str]]
+    used_test_mode: bool = False
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:

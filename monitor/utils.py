@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 PRICE_RE = re.compile(r"(?:£|GBP\s?)([\d,]+(?:\.\d{2})?)", re.I)
 RAM_RE = re.compile(r"(\d{2,3})\s?GB(?:\s+(?:unified\s+)?memory|\s+RAM)?", re.I)
+SCREEN_RE = re.compile(r"(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")", re.I)
+KEYBOARD_RE = re.compile(r"\b(UK|US|ISO|ANSI|QWERTY(?:\s*-?\s*(?:English|UK|US))?)\b", re.I)
 SSD_RE = re.compile(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))(?:\s+(?:SSD|Storage|Flash))?", re.I)
 SCREEN_RE = re.compile(r"(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")", re.I)
 CHIP_RE = re.compile(r"\b(M[234]\s+(?:Pro|Max)|M[234])\b", re.I)
@@ -28,6 +30,12 @@ def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def clean_whitespace(text: str | None) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def parse_price(text: str | None) -> float | None:
+    match = PRICE_RE.search(text or "")
 def parse_price(text: str | None) -> float | None:
     if not text:
         return None
@@ -36,6 +44,8 @@ def parse_price(text: str | None) -> float | None:
 
 
 def parse_ram_gb(text: str | None) -> int | None:
+    values = [int(m.group(1)) for m in RAM_RE.finditer(text or "")]
+    return max(values) if values else None
     if not text:
         return None
     values = [int(m.group(1)) for m in RAM_RE.finditer(text)]
@@ -46,6 +56,9 @@ def parse_ram_gb(text: str | None) -> int | None:
 def parse_ssd_gb(text: str | None) -> int | None:
     if not text:
         return None
+    primary = re.search(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))\s+(?:SSD|Storage|Flash|Drive)", text, re.I)
+    token = primary.group(1) if primary else None
+    if not token:
     match = re.search(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))\s+(?:SSD|Storage|Flash)", text, re.I)
     token = None
     if match:
@@ -61,6 +74,7 @@ def parse_ssd_gb(text: str | None) -> int | None:
     if not token:
         return None
     token = token.upper().replace(" ", "")
+    return int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2]))
     return int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2])) if token.endswith("GB") else None
 
 
@@ -85,6 +99,8 @@ def parse_keyboard(text: str | None) -> str | None:
     return match.group(1).upper() if match else None
 
 
+def slugify(value: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
 def clean_whitespace(text: str | None) -> str:
     return re.sub(r"\s+", " ", text or "").strip()
 
@@ -116,6 +132,10 @@ def dump_xlsx(path: Path, rows: Iterable[dict]) -> None:
             label = chr(65 + rem) + label
         return f"{label}{row}"
 
+    sheet_rows = [headers] + [[json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else ("" if v is None else str(v)) for v in row.values()] for row in rows] if headers else []
+    sheet_xml_rows = []
+    for r_idx, row in enumerate(sheet_rows, start=1):
+        cells = [f'<c r="{cell_ref(c_idx, r_idx)}" t="inlineStr"><is><t>{escape(str(value))}</t></is></c>' for c_idx, value in enumerate(row, start=1)]
     sheet_rows = []
     if headers:
         sheet_rows.append(headers)

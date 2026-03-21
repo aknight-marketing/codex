@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import json
 import logging
 import time
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
 try:
+    from playwright.sync_api import sync_playwright
+except Exception:  # pragma: no cover
     from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
 except Exception:  # pragma: no cover - fallback for minimal environments
     Browser = BrowserContext = Page = None
@@ -19,6 +23,7 @@ class BrowserConfig:
     headless: bool = True
     timeout_ms: int = 30000
     retries: int = 2
+    fixture_path: str | None = None
 
 
 class BrowserSession:
@@ -28,6 +33,26 @@ class BrowserSession:
         self.browser = None
         self.context = None
         self.mode = "urllib"
+        self.fixtures = self._load_fixtures(config.fixture_path)
+
+    @staticmethod
+    def _load_fixtures(path: str | None) -> dict[str, str]:
+        if not path:
+            return {}
+        fixture_path = Path(path)
+        if not fixture_path.is_absolute():
+            fixture_path = Path.cwd() / fixture_path
+        if not fixture_path.exists():
+            raise FileNotFoundError(f"Fixture file not found: {fixture_path}")
+        payload = json.loads(fixture_path.read_text(encoding="utf-8"))
+        if isinstance(payload, dict):
+            return {k: str(v) for k, v in payload.items()}
+        raise ValueError("Fixture file must be a JSON object mapping URL to HTML")
+
+    def __enter__(self) -> "BrowserSession":
+        if self.fixtures:
+            self.mode = "fixture"
+            return self
 
     def __enter__(self) -> "BrowserSession":
         if sync_playwright is not None:
@@ -55,6 +80,10 @@ class BrowserSession:
             self._pw.stop()
 
     def get_html(self, url: str) -> str:
+        if self.mode == "fixture":
+            if url not in self.fixtures:
+                raise KeyError(f"No fixture HTML for URL: {url}")
+            return self.fixtures[url]
         last_exc = None
         for attempt in range(1, self.config.retries + 2):
             try:
