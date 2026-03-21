@@ -22,18 +22,15 @@ def _validate_listing(listing: Listing) -> Listing:
         missing.append("screen_size_in_not_14")
     if listing.stock_status != "in_stock":
         missing.append("stock_status")
-    chip = (listing.chip or "").upper()
-    if chip.startswith("M") and listing.price_gbp is not None and listing.price_gbp < 500:
-        missing.append("price_suspiciously_low")
     if missing:
         listing.review_reason = ", ".join(missing)
     return listing
 
 
 def _dedupe(listings: list[Listing]) -> list[Listing]:
-    deduped: dict[tuple[str, str | None, int | None, int | None, str | None], Listing] = {}
+    deduped: dict[tuple[str, int | None, int | None, str | None], Listing] = {}
     for item in sorted(listings, key=lambda x: x.total_score, reverse=True):
-        key = (item.vendor_key, (item.title or "").lower(), item.ram_gb, item.ssd_gb, item.chip)
+        key = ((item.title or "").lower(), item.ram_gb, item.ssd_gb, item.chip)
         deduped.setdefault(key, item)
     return list(deduped.values())
 
@@ -83,40 +80,9 @@ def load_state(path: Path) -> dict:
 
 def save_state(path: Path, listings: list[Listing]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        item.url: {
-            "vendor": item.vendor,
-            "vendor_key": item.vendor_key,
-            "title": item.title,
-            "price_gbp": item.price_gbp,
-            "stock_status": item.stock_status,
-        }
-        for item in listings
-        if item.url
-    }
+    payload = {item.url: {"price_gbp": item.price_gbp, "stock_status": item.stock_status, "total_score": item.total_score} for item in listings if item.url}
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def diff_state(previous: dict, current: list[Listing], generated_at: str) -> list[Listing]:
-    changes = [
-        item
-        for item in current
-        if previous.get(item.url or "") != {"vendor": item.vendor, "vendor_key": item.vendor_key, "title": item.title, "price_gbp": item.price_gbp, "stock_status": item.stock_status}
-    ]
-    current_urls = {item.url for item in current if item.url}
-    for url, before in previous.items():
-        if url in current_urls:
-            continue
-        changes.append(
-            Listing(
-                timestamp=generated_at,
-                vendor=str(before.get("vendor") or "Unknown vendor"),
-                vendor_key=str(before.get("vendor_key") or "unknown"),
-                title=str(before.get("title") or url),
-                price_gbp=before.get("price_gbp"),
-                stock_status="out_of_stock",
-                url=url,
-                rationale="listing disappeared from the current shortlist",
-            )
-        )
-    return changes
+def diff_state(previous: dict, current: list[Listing]) -> list[Listing]:
+    return [item for item in current if previous.get(item.url or "") != {"price_gbp": item.price_gbp, "stock_status": item.stock_status, "total_score": item.total_score}]

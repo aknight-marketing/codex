@@ -25,14 +25,6 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Restore published docs cache
-        if: github.ref == 'refs/heads/main'
-        uses: actions/cache/restore@v4
-        with:
-          path: docs/
-          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
-          restore-keys: |
-            refurb-pages-${{ github.ref_name }}-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -50,12 +42,6 @@ jobs:
         with:
           name: refurb-monitor-full-docs
           path: docs/
-      - name: Save published docs cache
-        if: github.ref == 'refs/heads/main'
-        uses: actions/cache/save@v4
-        with:
-          path: docs/
-          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
       - name: Upload Pages artifact
         if: github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3

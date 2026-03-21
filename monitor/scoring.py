@@ -13,12 +13,6 @@ TARGET_PRICE = {
 }
 
 
-def _normalize_ssd_gb(value: int) -> int:
-    if 960 <= value <= 1000:
-        return 1024
-    return value
-
-
 def spec_fit_score(listing: Listing) -> float:
     score = 0.0
     chip = (listing.chip or "").upper()
@@ -51,7 +45,7 @@ def spec_fit_score(listing: Listing) -> float:
 def value_score(listing: Listing) -> float:
     chip = (listing.chip or "").upper()
     ram = listing.ram_gb or 0
-    ssd = _normalize_ssd_gb(listing.ssd_gb or 0)
+    ssd = listing.ssd_gb or 0
     price = listing.price_gbp
     if price is None:
         return -20

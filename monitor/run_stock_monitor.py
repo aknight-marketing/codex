@@ -22,12 +22,12 @@ def main() -> None:
     ensure_dir(OUTPUT_DIR)
     result = run_monitor(config, mode="stock", test_mode=args.test_mode, vendor_filter=set(config.get("watchlist_vendors", [])) or None)
     previous = load_state(OUTPUT_DIR / "latest_state.json")
-    changes = diff_state(previous, result.shortlist, result.generated_at)
+    changes = diff_state(previous, result.shortlist)
     ts = utc_now_iso().replace(":", "-")
     base_path = OUTPUT_DIR / f"stock_monitor_{ts}"
     summary = build_stock_monitor_summary(result, changes)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor", "stock-monitoring")
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor")
     save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
     if changes:
         try:
