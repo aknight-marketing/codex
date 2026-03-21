@@ -1,0 +1,25 @@
+name: Validate GitHub Actions Workflows
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - work
+      - 'codex/**'
+
+permissions:
+  contents: read
+
+jobs:
+  actionlint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Install actionlint
+        run: go install github.com/rhysd/actionlint/cmd/actionlint@v1.6.27
+      - name: Lint workflow files
+        run: $(go env GOPATH)/bin/actionlint
