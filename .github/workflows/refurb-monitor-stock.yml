@@ -21,6 +21,9 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
+jobs:
+  stock-check:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -35,6 +38,7 @@ jobs:
       - name: Run stock monitor
         run: python -m monitor.run_stock_monitor --verbose
       - name: Upload debug outputs
+      - name: Upload outputs
         uses: actions/upload-artifact@v4
         with:
           name: refurb-monitor-stock-output

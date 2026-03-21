@@ -16,6 +16,10 @@ PRICE_RE = re.compile(r"(?:£|GBP\s?)([\d,]+(?:\.\d{2})?)", re.I)
 RAM_RE = re.compile(r"(\d{2,3})\s?GB(?:\s+(?:unified\s+)?memory|\s+RAM)?", re.I)
 SCREEN_RE = re.compile(r"(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")", re.I)
 KEYBOARD_RE = re.compile(r"\b(UK|US|ISO|ANSI|QWERTY(?:\s*-?\s*(?:English|UK|US))?)\b", re.I)
+SSD_RE = re.compile(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))(?:\s+(?:SSD|Storage|Flash))?", re.I)
+SCREEN_RE = re.compile(r"(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")", re.I)
+CHIP_RE = re.compile(r"\b(M[234]\s+(?:Pro|Max)|M[234])\b", re.I)
+KEYBOARD_RE = re.compile(r"\b(UK|US|QWERTY(?:\s*-?\s*(?:English|UK|US))?)\b", re.I)
 
 
 def utc_now_iso() -> str:
@@ -32,12 +36,21 @@ def clean_whitespace(text: str | None) -> str:
 
 def parse_price(text: str | None) -> float | None:
     match = PRICE_RE.search(text or "")
+def parse_price(text: str | None) -> float | None:
+    if not text:
+        return None
+    match = PRICE_RE.search(text.replace("\xa0", " "))
     return float(match.group(1).replace(",", "")) if match else None
 
 
 def parse_ram_gb(text: str | None) -> int | None:
     values = [int(m.group(1)) for m in RAM_RE.finditer(text or "")]
     return max(values) if values else None
+    if not text:
+        return None
+    values = [int(m.group(1)) for m in RAM_RE.finditer(text)]
+    preferred = [v for v in values if v in {18, 24, 32, 36, 48, 64, 96, 128}]
+    return max(preferred or values) if values else None
 
 
 def parse_ssd_gb(text: str | None) -> int | None:
@@ -46,6 +59,11 @@ def parse_ssd_gb(text: str | None) -> int | None:
     primary = re.search(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))\s+(?:SSD|Storage|Flash|Drive)", text, re.I)
     token = primary.group(1) if primary else None
     if not token:
+    match = re.search(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))\s+(?:SSD|Storage|Flash)", text, re.I)
+    token = None
+    if match:
+        token = match.group(1)
+    else:
         candidates = re.findall(r"((?:\d+(?:\.\d+)?)\s?(?:TB|GB))", text, re.I)
         storage_like = []
         for candidate in candidates:
@@ -57,6 +75,7 @@ def parse_ssd_gb(text: str | None) -> int | None:
         return None
     token = token.upper().replace(" ", "")
     return int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2]))
+    return int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2])) if token.endswith("GB") else None
 
 
 def parse_screen_size(text: str | None) -> float | None:
@@ -82,6 +101,8 @@ def parse_keyboard(text: str | None) -> str | None:
 
 def slugify(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", value.lower()).strip("-")
+def clean_whitespace(text: str | None) -> str:
+    return re.sub(r"\s+", " ", text or "").strip()
 
 
 def dump_json(path: Path, data: object) -> None:
@@ -115,6 +136,16 @@ def dump_xlsx(path: Path, rows: Iterable[dict]) -> None:
     sheet_xml_rows = []
     for r_idx, row in enumerate(sheet_rows, start=1):
         cells = [f'<c r="{cell_ref(c_idx, r_idx)}" t="inlineStr"><is><t>{escape(str(value))}</t></is></c>' for c_idx, value in enumerate(row, start=1)]
+    sheet_rows = []
+    if headers:
+        sheet_rows.append(headers)
+        for row in rows:
+            sheet_rows.append([json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else ("" if v is None else str(v)) for v in row.values()])
+    sheet_xml_rows = []
+    for r_idx, row in enumerate(sheet_rows, start=1):
+        cells = []
+        for c_idx, value in enumerate(row, start=1):
+            cells.append(f'<c r="{cell_ref(c_idx, r_idx)}" t="inlineStr"><is><t>{escape(str(value))}</t></is></c>')
         sheet_xml_rows.append(f'<row r="{r_idx}">{"".join(cells)}</row>')
     workbook_xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="listings" sheetId="1" r:id="rId1"/></sheets></workbook>'
     rels_xml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'
