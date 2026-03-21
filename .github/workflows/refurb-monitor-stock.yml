@@ -1,0 +1,48 @@
+name: Refurb Monitor Stock Checks
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refurb-monitor-pages
+  cancel-in-progress: false
+
+jobs:
+  stock-check:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/configure-pages@v5
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r monitor/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Run stock monitor
+        run: python -m monitor.run_stock_monitor --verbose
+      - name: Upload debug outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-stock-output
+          path: monitor/output/
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
