@@ -7,8 +7,6 @@ from monitor.config import OUTPUT_DIR, load_config
 from monitor.emailer import maybe_send_email
 from monitor.pipeline import run_monitor, save_state
 from monitor.reporting import build_full_summary, publish_docs, write_run_outputs
-from monitor.pipeline import run_monitor, save_state
-from monitor.reporting import build_full_summary, write_outputs
 from monitor.utils import configure_logging, ensure_dir, utc_now_iso
 
 
@@ -29,25 +27,18 @@ def main() -> None:
     outputs = write_run_outputs(base_path, result, summary)
     docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep")
     save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
-    maybe_send_email(
-        subject=f"MacBook monitor full sweep: {'BUY NOW' if result.shortlist and result.shortlist[0].buy_now else 'WAIT'}",
-        body=f"Generated: {result.generated_at}\nTop result: {(result.shortlist[0].title + ' ' + str(result.shortlist[0].price_gbp)) if result.shortlist else 'No shortlist results'}\nReport: index.html",
-    )
+    try:
+        maybe_send_email(
+            subject=f"MacBook monitor full sweep: {'BUY NOW' if result.shortlist and result.shortlist[0].buy_now else 'WAIT'}",
+            body=f"Generated: {result.generated_at}\nTop result: {(result.shortlist[0].title + ' ' + str(result.shortlist[0].price_gbp)) if result.shortlist else 'No shortlist results'}\nReport: index.html",
+        )
+    except Exception as exc:
+        print(f"Email notification failed: {exc}")
     print("Wrote outputs:")
     for key, value in {**outputs, **docs}.items():
         print(f"- {key}: {value}")
     print(f"- shortlist: {len(result.shortlist)}")
     print(f"- needs_review: {len(result.needs_review)}")
-    listings = run_monitor(config, mode="full")
-    ts = utc_now_iso().replace(":", "-")
-    base_path = OUTPUT_DIR / f"full_sweep_{ts}"
-    summary = build_full_summary(listings, ts)
-    outputs = write_outputs(base_path, listings, summary)
-    save_state(OUTPUT_DIR / "latest_state.json", listings)
-    print("Wrote outputs:")
-    for key, value in outputs.items():
-        print(f"- {key}: {value}")
-    print(f"- listings: {len(listings)}")
 
 
 if __name__ == "__main__":
