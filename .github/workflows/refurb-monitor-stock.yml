@@ -1,0 +1,68 @@
+name: Refurb Monitor Stock Checks
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refurb-monitor-stock
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.branch.outputs.should_deploy }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - id: branch
+        run: |
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            echo "should_deploy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_deploy=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r monitor/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Run stock monitor
+        run: python -m monitor.run_stock_monitor --verbose
+      - name: Upload debug outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-stock-output
+          path: monitor/output/
+      - name: Upload generated docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-stock-docs
+          path: docs/
+      - name: Upload Pages artifact
+        if: steps.branch.outputs.should_deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+
+  deploy:
+    if: needs.build.outputs.should_deploy == 'true'
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
