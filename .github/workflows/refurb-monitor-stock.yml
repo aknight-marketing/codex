@@ -1,0 +1,28 @@
+name: Refurb Monitor Stock Checks
+
+on:
+  schedule:
+    - cron: '0 11 * * *'
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+
+jobs:
+  stock-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r monitor/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Run stock monitor
+        run: python -m monitor.run_stock_monitor --verbose
+      - name: Upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-stock-output
+          path: monitor/output/
