@@ -98,15 +98,14 @@ def _render_html(title: str, body: str) -> str:
     return f"<!doctype html><html lang='en'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width, initial-scale=1'><title>{title}</title><style>body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0;background:#0f172a;color:#e2e8f0;line-height:1.5}}a{{color:#93c5fd}}main{{max-width:960px;margin:0 auto;padding:16px}}.hero,.card,table{{background:#111827;border-radius:14px;padding:16px;margin:12px 0}}table{{width:100%;border-collapse:collapse;display:block;overflow:auto}}th,td{{padding:10px;border-bottom:1px solid #334155;text-align:left;white-space:nowrap}}.pill{{display:inline-block;padding:6px 10px;border-radius:999px;background:#1d4ed8}}.wait{{background:#7c2d12}}ul{{padding-left:20px}}small{{color:#94a3b8}}pre{{white-space:pre-wrap}}</style></head><body><main>{body}</main></body></html>"
 
 
-def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_name: str, site_slug: str) -> dict[str, Path]:
-    site_dir = docs_dir / site_slug
-    ensure_dir(site_dir / "history")
-    ensure_dir(site_dir / "data" / "history")
+def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_name: str) -> dict[str, Path]:
+    ensure_dir(docs_dir / "history")
+    ensure_dir(docs_dir / "data" / "history")
     slug = slugify(f"{report_name}-{result.generated_at}")
-    latest_json = site_dir / "data" / "latest.json"
-    history_json = site_dir / "data" / "history" / f"{slug}.json"
-    latest_html = site_dir / "index.html"
-    history_html = site_dir / "history" / f"{slug}.html"
+    latest_json = docs_dir / "data" / "latest.json"
+    history_json = docs_dir / "data" / "history" / f"{slug}.json"
+    latest_html = docs_dir / "index.html"
+    history_html = docs_dir / "history" / f"{slug}.html"
     payload = {
         "generated_at": result.generated_at,
         "mode": result.mode,
@@ -124,7 +123,7 @@ def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_
         rows.append(f"<tr><td>{idx}</td><td>{item.vendor}</td><td><a href='{item.url}'>{item.title}</a></td><td>{item.chip or '—'}</td><td>{item.ram_gb or '—'}GB</td><td>{ssd}</td><td>{_price(item.price_gbp)}</td><td>{item.total_score:.1f}</td></tr>")
     needs_review_html = ''.join(f"<li><a href='{item.url}'>{item.vendor}: {item.title}</a> — {item.review_reason}</li>" for item in result.needs_review) or '<li>None</li>'
     vendor_issues_html = ''.join(f"<li>{issue.get('vendor')}: {issue.get('error')} {issue.get('url', '')}</li>" for issue in result.vendor_errors) or '<li>None</li>'
-    archive_links = [f"<li><a href='history/{entry.name}'>{entry.stem}</a></li>" for entry in sorted((site_dir / 'history').glob('*.html'), reverse=True) if entry.name != history_html.name]
+    archive_links = [f"<li><a href='history/{entry.name}'>{entry.stem}</a></li>" for entry in sorted((docs_dir / 'history').glob('*.html'), reverse=True) if entry.name != history_html.name]
     pill_class = 'pill wait' if not result.shortlist or not result.shortlist[0].buy_now else 'pill'
     verdict = 'WAIT THIS WEEK' if not result.shortlist or not result.shortlist[0].buy_now else 'BUY NOW'
     latest_body = (
@@ -133,7 +132,7 @@ def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_
         f"<section class='card'><h2>Ranked shortlist</h2><table><thead><tr><th>#</th><th>Vendor</th><th>Listing</th><th>Chip</th><th>RAM</th><th>SSD</th><th>Price</th><th>Score</th></tr></thead><tbody>{''.join(rows)}</tbody></table></section>"
         f"<section class='card'><h2>Needs review</h2><ul>{needs_review_html}</ul></section>"
         f"<section class='card'><h2>Vendor issues</h2><ul>{vendor_issues_html}</ul></section>"
-        f"<section class='card'><h2>Archive</h2><ul><li><a href='history/{history_html.name}'>This run</a></li>{''.join(archive_links)}</ul><small>Machine-readable latest data: <a href='data/latest.json'>data/latest.json</a></small></section>"
+        f"<section class='card'><h2>Archive</h2><ul><li><a href='history/{history_html.name}'>This run</a></li>{''.join(archive_links)}</ul><small>Machine-readable latest data: <a href='data/latest.json'>docs/data/latest.json</a></small></section>"
     )
     history_body = f"<section class='hero'><h1>{report_name.replace('_', ' ').title()}</h1><p>{result.generated_at}</p><p><a href='../index.html'>Back to latest dashboard</a></p></section><section class='card'><pre>{summary_md}</pre></section>"
     latest_html.write_text(_render_html("MacBook monitor dashboard", latest_body), encoding="utf-8")

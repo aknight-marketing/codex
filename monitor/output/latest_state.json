@@ -1,0 +1,17 @@
+{
+  "https://www.apple.com/uk/shop/product/g17jcb/a/refurbished-14-inch-macbook-pro-apple-m2-max-chip-with-12-core-cpu-and-38-core-gpu-space-grey": {
+    "price_gbp": 3079.0,
+    "stock_status": "in_stock",
+    "total_score": 109.0
+  },
+  "https://macfinder.co.uk/product-category/macbook-pro/m3-macbook-pro/#sample-silver": {
+    "price_gbp": 1075.0,
+    "stock_status": "in_stock",
+    "total_score": 84.6
+  },
+  "https://www.apple.com/uk/shop/product/g1ds0b/a/refurbished-14-inch-macbook-pro-apple-m4-chip-with-10-core-cpu-and-10-core-gpu-space-black": {
+    "price_gbp": 1359.0,
+    "stock_status": "in_stock",
+    "total_score": 72.0
+  }
+}

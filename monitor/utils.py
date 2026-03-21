@@ -37,13 +37,7 @@ def parse_price(text: str | None) -> float | None:
 
 def parse_ram_gb(text: str | None) -> int | None:
     values = [int(m.group(1)) for m in RAM_RE.finditer(text or "")]
-    plausible = [value for value in values if value <= 128]
-    preferred = [value for value in plausible if value in {8, 16, 18, 24, 32, 36, 48, 64, 96, 128}]
-    if preferred:
-        return max(preferred)
-    if plausible:
-        return max(plausible)
-    return None
+    return max(values) if values else None
 
 
 def parse_ssd_gb(text: str | None) -> int | None:

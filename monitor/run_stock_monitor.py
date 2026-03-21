@@ -27,7 +27,7 @@ def main() -> None:
     base_path = OUTPUT_DIR / f"stock_monitor_{ts}"
     summary = build_stock_monitor_summary(result, changes)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor", "stock-monitoring")
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor")
     save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
     if changes:
         try:
