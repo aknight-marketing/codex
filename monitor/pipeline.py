@@ -8,6 +8,8 @@ from monitor.browser import BrowserConfig, BrowserSession
 from monitor.discovery import discover_vendor_candidates
 from monitor.extractors import extract_listing
 from monitor.models import Listing, MonitorResult
+from monitor.extractors.generic import extract_listing_from_html
+from monitor.models import Listing
 from monitor.scoring import score_listing
 from monitor.utils import utc_now_iso
 
@@ -42,6 +44,37 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
     vendor_errors: list[dict[str, str]] = []
     fixture_path = config.get("test_mode", {}).get("fixture_path") if test_mode else None
     browser_config = BrowserConfig(headless=True, timeout_ms=config.get("defaults", {}).get("timeout_ms", 30000), fixture_path=fixture_path)
+
+def _load_offline_snapshots(config: dict, generated_at: str, vendor_filter: set[str] | None = None) -> list[Listing]:
+    snapshot_path = config.get("offline_snapshot_path")
+    if not snapshot_path:
+        return []
+    path = Path(snapshot_path)
+    if not path.is_absolute():
+        path = Path.cwd() / path
+    if not path.exists():
+        return []
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    vendors = {vendor["key"]: vendor for vendor in config["vendors"]}
+    results: list[Listing] = []
+    for item in payload:
+        vendor = vendors.get(item["vendor_key"])
+        if not vendor or (vendor_filter and vendor["key"] not in vendor_filter):
+            continue
+        listing = extract_listing_from_html(vendor, item["url"], item["html"], item.get("source_url", item["url"]), generated_at)
+        if listing:
+            listing.notes = vendor.get("notes")
+            score_listing(listing, vendor_quality=float(vendor.get("trust_score", 10)))
+            results.append(listing)
+    if results:
+        logger.warning("Using offline snapshot fallback because live network fetches are unavailable in this environment.")
+    return results
+
+
+def run_monitor(config: dict, mode: str = "full", vendor_filter: set[str] | None = None) -> list[Listing]:
+    generated_at = utc_now_iso()
+    results: list[Listing] = []
+    browser_config = BrowserConfig(headless=True, timeout_ms=config.get("defaults", {}).get("timeout_ms", 30000))
     with BrowserSession(browser_config) as browser:
         for vendor in config["vendors"]:
             if vendor_filter and vendor["key"] not in vendor_filter:
@@ -55,6 +88,12 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
                 try:
                     html = browser.get_html(candidate.url)
                     listing = extract_listing(vendor, candidate.url, html, candidate.source_url, generated_at)
+            candidates = discover_vendor_candidates(vendor)
+            limit = vendor.get("stock_monitor_max_candidates", 4) if mode == "stock" else vendor.get("full_sweep_max_candidates", 8)
+            for candidate in candidates[:limit]:
+                try:
+                    html = browser.get_html(candidate.url)
+                    listing = extract_listing_from_html(vendor, candidate.url, html, candidate.source_url, generated_at)
                     if not listing:
                         continue
                     listing.notes = vendor.get("notes")
@@ -70,6 +109,18 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
     shortlist = sorted(_dedupe(shortlist), key=lambda x: x.total_score, reverse=True)
     needs_review = sorted(_dedupe(needs_review), key=lambda x: x.vendor)
     return MonitorResult(generated_at=generated_at, mode=mode, shortlist=shortlist, needs_review=needs_review, vendor_errors=vendor_errors, used_test_mode=test_mode)
+                    if listing.url:
+                        results.append(listing)
+                        logger.info("Live listing: %s | %s | %s", listing.vendor, listing.title, listing.price_gbp)
+                except Exception as exc:
+                    logger.warning("Vendor %s candidate %s failed: %s", vendor["name"], candidate.url, exc)
+    if not results:
+        results = _load_offline_snapshots(config, generated_at, vendor_filter)
+    deduped: dict[tuple[str, int | None, int | None, str | None], Listing] = {}
+    for item in sorted(results, key=lambda x: x.total_score, reverse=True):
+        key = ((item.title or "").lower(), item.ram_gb, item.ssd_gb, item.chip)
+        deduped.setdefault(key, item)
+    return sorted(deduped.values(), key=lambda x: x.total_score, reverse=True)
 
 
 def load_state(path: Path) -> dict:
@@ -86,3 +137,9 @@ def save_state(path: Path, listings: list[Listing]) -> None:
 
 def diff_state(previous: dict, current: list[Listing]) -> list[Listing]:
     return [item for item in current if previous.get(item.url or "") != {"price_gbp": item.price_gbp, "stock_status": item.stock_status, "total_score": item.total_score}]
+    changes = []
+    for item in current:
+        before = previous.get(item.url or "")
+        if before is None or before.get("stock_status") != item.stock_status or before.get("price_gbp") != item.price_gbp:
+            changes.append(item)
+    return changes

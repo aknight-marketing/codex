@@ -12,6 +12,9 @@ logger = logging.getLogger(__name__)
 try:
     from playwright.sync_api import sync_playwright
 except Exception:  # pragma: no cover
+    from playwright.sync_api import Browser, BrowserContext, Page, sync_playwright
+except Exception:  # pragma: no cover - fallback for minimal environments
+    Browser = BrowserContext = Page = None
     sync_playwright = None
 
 
@@ -50,6 +53,8 @@ class BrowserSession:
         if self.fixtures:
             self.mode = "fixture"
             return self
+
+    def __enter__(self) -> "BrowserSession":
         if sync_playwright is not None:
             try:
                 self._pw = sync_playwright().start()
