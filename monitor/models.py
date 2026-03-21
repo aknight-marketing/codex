@@ -47,9 +47,3 @@ class MonitorResult:
     needs_review: list[Listing]
     vendor_errors: list[dict[str, str]]
     used_test_mode: bool = False
-    raw: dict[str, Any] = field(default_factory=dict)
-
-    def to_dict(self) -> dict[str, Any]:
-        data = asdict(self)
-        data["raw"] = self.raw
-        return data
