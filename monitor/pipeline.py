@@ -28,9 +28,9 @@ def _validate_listing(listing: Listing) -> Listing:
 
 
 def _dedupe(listings: list[Listing]) -> list[Listing]:
-    deduped: dict[tuple[str, str | None, int | None, int | None, str | None], Listing] = {}
+    deduped: dict[tuple[str, int | None, int | None, str | None], Listing] = {}
     for item in sorted(listings, key=lambda x: x.total_score, reverse=True):
-        key = (item.vendor_key, (item.title or "").lower(), item.ram_gb, item.ssd_gb, item.chip)
+        key = ((item.title or "").lower(), item.ram_gb, item.ssd_gb, item.chip)
         deduped.setdefault(key, item)
     return list(deduped.values())
 

@@ -1,0 +1,140 @@
+[
+  {
+    "timestamp": "2026-03-21T11:29:22+00:00",
+    "vendor": "Apple Certified Refurbished UK",
+    "vendor_key": "apple_refurb_uk",
+    "title": "Refurbished 14-inch MacBook Pro Apple M2 Max Chip with 12-Core CPU and 38-Core GPU - Space Grey",
+    "chip": "M2 MAX",
+    "ram_gb": 64,
+    "ssd_gb": 2048,
+    "screen_size_in": 14.0,
+    "condition": null,
+    "stock_status": "in_stock",
+    "price_gbp": 3079.0,
+    "warranty": "1 year Apple warranty",
+    "returns": "14-day returns",
+    "delivery_estimate": null,
+    "keyboard_layout": "UK",
+    "url": "https://www.apple.com/uk/shop/product/g17jcb/a/refurbished-14-inch-macbook-pro-apple-m2-max-chip-with-12-core-cpu-and-38-core-gpu-space-grey",
+    "seller_quality_score": 25.0,
+    "spec_fit_score": 100.0,
+    "value_score": -6,
+    "total_score": 109.0,
+    "notes": "Apple certified refurbished; strongest trust, but often pricey.",
+    "buy_now": false,
+    "rationale": "M2 MAX, 64GB RAM, 2TB SSD, £3,079, strong fallback",
+    "source_url": "https://www.apple.com/uk/shop/product/g17jcb/a/refurbished-14-inch-macbook-pro-apple-m2-max-chip-with-12-core-cpu-and-38-core-gpu-space-grey",
+    "availability_text": "https://schema.org/InStock",
+    "raw": {
+      "domain": "www.apple.com",
+      "product_json_ld": {
+        "@type": "Product",
+        "name": "Refurbished 14-inch MacBook Pro Apple M2 Max Chip with 12-Core CPU and 38-Core GPU - Space Grey",
+        "offers": {
+          "price": "3079.00",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-21T11:29:22+00:00",
+    "vendor": "MacFinder",
+    "vendor_key": "macfinder",
+    "title": "M3 MacBook Pro - MacFinder - Certified Refurbished Apple Systems",
+    "chip": "M3 PRO",
+    "ram_gb": 18,
+    "ssd_gb": 512,
+    "screen_size_in": 14.0,
+    "condition": null,
+    "stock_status": "in_stock",
+    "price_gbp": 1075.0,
+    "warranty": "12 month warranty",
+    "returns": "14-day returns",
+    "delivery_estimate": null,
+    "keyboard_layout": "UK",
+    "url": "https://macfinder.co.uk/product-category/macbook-pro/m3-macbook-pro/#sample-silver",
+    "seller_quality_score": 21.0,
+    "spec_fit_score": 48.0,
+    "value_score": 24,
+    "total_score": 84.6,
+    "notes": "Specialist UK Apple refurbisher with clear keyboard notes.",
+    "buy_now": false,
+    "rationale": "M3 PRO, 18GB RAM, 512GB SSD, £1,075, viable but not exceptional",
+    "source_url": "https://macfinder.co.uk/product-category/macbook-pro/m3-macbook-pro/",
+    "availability_text": "instock",
+    "raw": {
+      "domain": "macfinder.co.uk",
+      "product_json_ld": {}
+    }
+  },
+  {
+    "timestamp": "2026-03-21T11:29:22+00:00",
+    "vendor": "Apple Certified Refurbished UK",
+    "vendor_key": "apple_refurb_uk",
+    "title": "Refurbished 14-inch MacBook Pro Apple M4 Chip with 10-Core CPU and 10-Core GPU - Space Black",
+    "chip": "M4",
+    "ram_gb": 24,
+    "ssd_gb": 512,
+    "screen_size_in": 14.0,
+    "condition": null,
+    "stock_status": "in_stock",
+    "price_gbp": 1359.0,
+    "warranty": "1 year Apple warranty",
+    "returns": "14-day returns",
+    "delivery_estimate": null,
+    "keyboard_layout": "UK",
+    "url": "https://www.apple.com/uk/shop/product/g1ds0b/a/refurbished-14-inch-macbook-pro-apple-m4-chip-with-10-core-cpu-and-10-core-gpu-space-black",
+    "seller_quality_score": 25.0,
+    "spec_fit_score": 39.0,
+    "value_score": 18,
+    "total_score": 72.0,
+    "notes": "Apple certified refurbished; strongest trust, but often pricey.",
+    "buy_now": false,
+    "rationale": "M4, 24GB RAM, 512GB SSD, £1,359, viable but not exceptional",
+    "source_url": "https://www.apple.com/uk/shop/product/g1ds0b/a/refurbished-14-inch-macbook-pro-apple-m4-chip-with-10-core-cpu-and-10-core-gpu-space-black",
+    "availability_text": "https://schema.org/InStock",
+    "raw": {
+      "domain": "www.apple.com",
+      "product_json_ld": {
+        "@type": "Product",
+        "name": "Refurbished 14-inch MacBook Pro Apple M4 Chip with 10-Core CPU and 10-Core GPU - Space Black",
+        "offers": {
+          "price": "1359.00",
+          "availability": "https://schema.org/InStock"
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-03-21T11:29:22+00:00",
+    "vendor": "musicMagpie",
+    "vendor_key": "musicmagpie",
+    "title": "Apple MacBook Pro 14\" 2024 M4 14-Core CPU 20-Core GPU 24GB 1TB Space Black - musicMagpie Store",
+    "chip": "M4 PRO",
+    "ram_gb": 24,
+    "ssd_gb": 1024,
+    "screen_size_in": 14.0,
+    "condition": null,
+    "stock_status": "in_stock",
+    "price_gbp": null,
+    "warranty": "12 Month Warranty",
+    "returns": "14-day returns",
+    "delivery_estimate": "FREE Delivery",
+    "keyboard_layout": null,
+    "url": "https://www.musicmagpie.co.uk/store/products/apple-macbook-pro-14-2024-m4-14-core-cpu-20-core-gpu-24gb-1tb-space-black/",
+    "seller_quality_score": 15.0,
+    "spec_fit_score": 75.0,
+    "value_score": -12.0,
+    "total_score": 72.0,
+    "notes": "Large refurbisher; good policies, but high-spec stock can be sporadic.",
+    "buy_now": false,
+    "rationale": "M4 PRO, 24GB RAM, 1TB SSD, viable but not exceptional",
+    "source_url": "https://www.musicmagpie.co.uk/store/products/apple-macbook-pro-14-2024-m4-14-core-cpu-20-core-gpu-24gb-1tb-space-black/",
+    "availability_text": "instock",
+    "raw": {
+      "domain": "www.musicmagpie.co.uk",
+      "product_json_ld": {}
+    }
+  }
+]

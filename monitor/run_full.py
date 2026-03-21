@@ -25,7 +25,7 @@ def main() -> None:
     base_path = OUTPUT_DIR / f"full_sweep_{ts}"
     summary = build_full_summary(result)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep", "Refurb-monitor-26")
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep")
     save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
     try:
         maybe_send_email(
