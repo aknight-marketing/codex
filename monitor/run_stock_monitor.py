@@ -7,6 +7,8 @@ from monitor.config import OUTPUT_DIR, load_config
 from monitor.emailer import maybe_send_email
 from monitor.pipeline import diff_state, load_state, run_monitor, save_state
 from monitor.reporting import build_stock_monitor_summary, publish_docs, write_run_outputs
+from monitor.pipeline import diff_state, load_state, run_monitor, save_state
+from monitor.reporting import build_stock_monitor_summary, write_outputs
 from monitor.utils import configure_logging, ensure_dir, utc_now_iso
 
 
@@ -30,15 +32,23 @@ def main() -> None:
     docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor")
     save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
     if changes:
-        try:
-            maybe_send_email(subject="MacBook monitor stock update", body=f"Generated: {result.generated_at}\nChanges: {len(changes)}\nReport: index.html")
-        except Exception as exc:
-            print(f"Email notification failed: {exc}")
+        maybe_send_email(subject="MacBook monitor stock update", body=f"Generated: {result.generated_at}\nChanges: {len(changes)}\nReport: index.html")
     print("Wrote outputs:")
     for key, value in {**outputs, **docs}.items():
         print(f"- {key}: {value}")
     print(f"- shortlist: {len(result.shortlist)}")
     print(f"- needs_review: {len(result.needs_review)}")
+    listings = run_monitor(config, mode="stock", vendor_filter=set(config.get("watchlist_vendors", [])) or None)
+    previous = load_state(OUTPUT_DIR / "latest_state.json")
+    changes = diff_state(previous, listings)
+    ts = utc_now_iso().replace(":", "-")
+    base_path = OUTPUT_DIR / f"stock_monitor_{ts}"
+    summary = build_stock_monitor_summary(changes, ts)
+    outputs = write_outputs(base_path, changes, summary)
+    save_state(OUTPUT_DIR / "latest_state.json", listings)
+    print("Wrote outputs:")
+    for key, value in outputs.items():
+        print(f"- {key}: {value}")
     print(f"- changes: {len(changes)}")
 
 
