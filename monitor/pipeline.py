@@ -41,11 +41,7 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
     needs_review: list[Listing] = []
     vendor_errors: list[dict[str, str]] = []
     fixture_path = config.get("test_mode", {}).get("fixture_path") if test_mode else None
-    browser_config = BrowserConfig(
-        headless=True,
-        timeout_ms=config.get("defaults", {}).get("timeout_ms", 30000),
-        fixture_path=fixture_path,
-    )
+    browser_config = BrowserConfig(headless=True, timeout_ms=config.get("defaults", {}).get("timeout_ms", 30000), fixture_path=fixture_path)
     with BrowserSession(browser_config) as browser:
         for vendor in config["vendors"]:
             if vendor_filter and vendor["key"] not in vendor_filter:
@@ -73,14 +69,7 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
                     logger.warning("Vendor %s candidate %s failed: %s", vendor["name"], candidate.url, exc)
     shortlist = sorted(_dedupe(shortlist), key=lambda x: x.total_score, reverse=True)
     needs_review = sorted(_dedupe(needs_review), key=lambda x: x.vendor)
-    return MonitorResult(
-        generated_at=generated_at,
-        mode=mode,
-        shortlist=shortlist,
-        needs_review=needs_review,
-        vendor_errors=vendor_errors,
-        used_test_mode=test_mode,
-    )
+    return MonitorResult(generated_at=generated_at, mode=mode, shortlist=shortlist, needs_review=needs_review, vendor_errors=vendor_errors, used_test_mode=test_mode)
 
 
 def load_state(path: Path) -> dict:
@@ -91,25 +80,9 @@ def load_state(path: Path) -> dict:
 
 def save_state(path: Path, listings: list[Listing]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {
-        item.url: {
-            "price_gbp": item.price_gbp,
-            "stock_status": item.stock_status,
-            "total_score": item.total_score,
-        }
-        for item in listings
-        if item.url
-    }
+    payload = {item.url: {"price_gbp": item.price_gbp, "stock_status": item.stock_status, "total_score": item.total_score} for item in listings if item.url}
     path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def diff_state(previous: dict, current: list[Listing]) -> list[Listing]:
-    return [
-        item
-        for item in current
-        if previous.get(item.url or "") != {
-            "price_gbp": item.price_gbp,
-            "stock_status": item.stock_status,
-            "total_score": item.total_score,
-        }
-    ]
+    return [item for item in current if previous.get(item.url or "") != {"price_gbp": item.price_gbp, "stock_status": item.stock_status, "total_score": item.total_score}]
