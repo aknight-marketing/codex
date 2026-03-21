@@ -12,9 +12,9 @@ permissions:
   contents: read
 
 jobs:
-  actionlint:
+  validate-workflows:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Lint workflow files
-        uses: rhysd/actionlint@v1
+      - uses: actions/checkout@v5
+      - name: Validate workflow YAML and duplicate keys
+        run: ruby scripts/validate_workflows.rb
