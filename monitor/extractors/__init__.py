@@ -10,29 +10,14 @@ def _search(pattern: str, text: str, flags: int = re.I):
     return match.group(1).strip() if match else None
 
 
-def _offer_price(product):
-    offers = product.get('offers') if isinstance(product, dict) else None
-    if isinstance(offers, list):
-        offers = next((item for item in offers if isinstance(item, dict)), {})
-    elif not isinstance(offers, dict):
-        offers = {}
-    value = offers.get('price', 0) or 0
-    return float(value) or None
-
-
 def extract_apple(vendor, url, html_text, source_url, timestamp):
     product = extract_product_json(html_text)
     text = text_content(html_text)
     title = title_from_html(html_text, product)
     stock_status, availability_text, evidence = stock_from_html(html_text, text, product)
-    combined = f"{title} {text}".lower()
-    if '14-inch' not in combined and '14 inch' not in combined:
-        return None
-    if '16-inch' in combined or '16 inch' in combined:
-        return None
     if stock_status != 'in_stock' or 'add to bag' not in html_text.lower():
         return None
-    return build_listing(vendor, url, source_url, timestamp, html_text, title=title, text=text, stock_status=stock_status, availability_text=availability_text, stock_evidence='apple_add_to_bag', price=_offer_price(product), ram_gb=int(_search(r'(\d+)GB unified memory', text) or 0) or None, ssd_gb=(int(float((_search(r'((?:\d+(?:\.\d+)?)\s?TB) SSD', text) or '0TB').upper().replace('TB',''))) * 1024 if 'TB' in (_search(r'((?:\d+(?:\.\d+)?)\s?TB) SSD', text) or '') else int((_search(r'(\d+)GB SSD', text) or 0)) or None), keyboard_layout='UK')
+    return build_listing(vendor, url, source_url, timestamp, html_text, title=title, text=text, stock_status=stock_status, availability_text=availability_text, stock_evidence='apple_add_to_bag', price=float(product.get('offers', {}).get('price', 0) or 0) or None, ram_gb=int(_search(r'(\d+)GB unified memory', text) or 0) or None, ssd_gb=(int(float((_search(r'((?:\d+(?:\.\d+)?)\s?TB) SSD', text) or '0TB').upper().replace('TB',''))) * 1024 if 'TB' in (_search(r'((?:\d+(?:\.\d+)?)\s?TB) SSD', text) or '') else int((_search(r'(\d+)GB SSD', text) or 0)) or None), keyboard_layout='UK')
 
 
 def extract_macfinder(vendor, url, html_text, source_url, timestamp):
