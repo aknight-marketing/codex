@@ -1,0 +1,79 @@
+name: Refurb Monitor Full Sweep
+
+on:
+  schedule:
+    - cron: '0 8,9 * * 6'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refurb-monitor-full
+  cancel-in-progress: false
+
+jobs:
+  full-sweep:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - name: Gate Saturday UK schedule
+        shell: bash
+        run: |
+          if [[ "${{ github.event_name }}" != "schedule" ]]; then
+            exit 0
+          fi
+          hour=$(TZ=Europe/London date +%H)
+          dow=$(TZ=Europe/London date +%u)
+          if [[ "$dow" != "6" || "$hour" != "09" ]]; then
+            echo "Skipping duplicate UTC trigger outside 09:00 Europe/London."
+            exit 0
+          fi
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Restore published docs cache
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/restore@v4
+        with:
+          path: docs/
+          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            refurb-pages-${{ github.ref_name }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r monitor/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Run full sweep
+        run: python -m monitor.run_full --verbose
+      - name: Upload debug outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-full-output
+          path: monitor/output/
+      - name: Upload generated docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-full-docs
+          path: docs/
+      - name: Save published docs cache
+        if: github.ref == 'refs/heads/main'
+        uses: actions/cache/save@v4
+        with:
+          path: docs/
+          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        id: deploy
+        uses: actions/deploy-pages@v4
