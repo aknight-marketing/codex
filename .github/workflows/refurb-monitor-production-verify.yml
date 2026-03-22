@@ -1,0 +1,83 @@
+name: Refurb Monitor Production Verification
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_verification:
+        description: 'Deploy the live verification docs to GitHub Pages'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refurb-monitor-production-verify
+  cancel-in-progress: false
+
+jobs:
+  production-verification:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Restore published docs cache
+        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        uses: actions/cache/restore@v4
+        with:
+          path: docs/
+          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            refurb-pages-${{ github.ref_name }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r monitor/requirements.txt
+          python -m playwright install --with-deps chromium
+      - name: Run live production verification probe
+        run: python -m monitor.run_live_verification --verbose
+      - name: Verify Pages-compatible live verification path locally
+        run: |
+          rm -rf /tmp/codex-pages-check
+          mkdir -p /tmp/codex-pages-check/codex
+          cp -R docs/. /tmp/codex-pages-check/codex/
+          python -m http.server 8126 -d /tmp/codex-pages-check >/tmp/codex-pages.log 2>&1 &
+          server_pid=$!
+          sleep 2
+          python - <<'PYCODE'
+          import urllib.request
+          for url in [
+              'http://127.0.0.1:8126/codex/live-verification/',
+              'http://127.0.0.1:8126/codex/live-verification/data/latest.json',
+          ]:
+              with urllib.request.urlopen(url, timeout=10) as response:
+                  print(url, response.status, response.headers.get_content_type())
+          PYCODE
+          kill "$server_pid"
+      - name: Upload verification outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-production-verify-output
+          path: monitor/output/
+      - name: Upload verification docs
+        uses: actions/upload-artifact@v4
+        with:
+          name: refurb-monitor-production-verify-docs
+          path: docs/
+      - name: Upload Pages artifact
+        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+      - name: Deploy to GitHub Pages
+        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        id: deploy
+        uses: actions/deploy-pages@v4
