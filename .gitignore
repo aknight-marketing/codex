@@ -1,0 +1,9 @@
+monitor/output/*.xlsx
+__pycache__/
+monitor/output/*.csv
+monitor/output/*.json
+monitor/output/*.md
+monitor/output/latest_state.json
+docs/index.html
+docs/history/
+docs/data/
