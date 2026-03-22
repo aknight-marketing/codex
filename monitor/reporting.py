@@ -223,7 +223,16 @@ def write_placeholder_site(docs_dir: Path, site_slug: str, title: str, message: 
     return index
 
 
-def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_name: str, site_slug: str, public_site_url: str) -> dict[str, Path]:
+def publish_docs(
+    docs_dir: Path,
+    result: MonitorResult,
+    summary_md: str,
+    report_name: str,
+    site_slug: str,
+    public_site_url: str,
+    *,
+    update_root_index: bool = True,
+) -> dict[str, Path]:
     site_dir = docs_dir / site_slug
     ensure_dir(docs_dir)
     ensure_dir(site_dir / "history")
@@ -284,7 +293,7 @@ def publish_docs(docs_dir: Path, result: MonitorResult, summary_md: str, report_
         f"<section class='card'><h2>Archive</h2><ul>{archive_links}</ul><small>Machine-readable latest data: <a href='data/latest.json'>data/latest.json</a></small></section>"
     )
     history_body = f"<section class='nav'><a href='../index.html'>Back to latest dashboard</a><a href='../data/latest.json'>Latest JSON</a></section><section class='hero'><p class='pill {trust_pill}'>{result.trust_label}</p><h1>{report_name.replace('_', ' ').title()}</h1><p>{result.generated_at}</p></section><section class='card'><pre>{summary_md}</pre></section>"
-    root_index = _write_root_index(docs_dir, public_site_url)
+    root_index = _write_root_index(docs_dir, public_site_url) if update_root_index else docs_dir / 'index.html'
     latest_html.write_text(_render_html("MacBook monitor dashboard", latest_body), encoding="utf-8")
     history_html.write_text(_render_html(report_name, history_body), encoding="utf-8")
     return {"root_index": root_index, "latest_html": latest_html, "history_html": history_html, "latest_json": latest_json, "history_json": history_json}

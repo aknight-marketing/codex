@@ -245,9 +245,9 @@ def run_monitor(config: dict, mode: str = "full", test_mode: bool = False, vendo
     result.run_health = _build_run_health(result)
     result.quality_checks = _quality_checks(result)
     result.degraded = not all(check["passed"] for check in result.quality_checks)
+    result.production_readiness = _production_readiness(result)
     result.trust_label = _trust_label(result)
     result.can_recommend_buy_now = _can_recommend_buy_now(result)
-    result.production_readiness = _production_readiness(result)
     result.run_health = _build_run_health(result)
     return result
 

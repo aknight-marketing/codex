@@ -21,14 +21,14 @@ def main() -> None:
     config = load_config(args.config) if args.config else load_config()
     ensure_dir(OUTPUT_DIR)
     result = run_monitor(config, mode="stock", test_mode=args.test_mode, vendor_filter=set(config.get("watchlist_vendors", [])) or None)
-    previous = load_state(OUTPUT_DIR / "latest_state.json")
+    previous = load_state(OUTPUT_DIR / "stock_monitor_state.json")
     changes = diff_state(previous, result.shortlist, result.generated_at)
     ts = utc_now_iso().replace(":", "-")
     base_path = OUTPUT_DIR / f"stock_monitor_{ts}"
     summary = build_stock_monitor_summary(result, changes)
     outputs = write_run_outputs(base_path, result, summary)
     docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor", "stock-monitor", config.get("defaults", {}).get("pages_site_url", "https://aknight-marketing.github.io/codex/"))
-    save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
+    save_state(OUTPUT_DIR / "stock_monitor_state.json", result.shortlist)
     if changes:
         try:
             maybe_send_email(subject="MacBook monitor stock update", body=(f"Generated: {result.generated_at}\n"

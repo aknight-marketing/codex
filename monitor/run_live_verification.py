@@ -5,7 +5,7 @@ from pathlib import Path
 
 from monitor.config import OUTPUT_DIR, load_config
 from monitor.pipeline import run_monitor
-from monitor.reporting import build_live_verification_summary, publish_docs, write_placeholder_site, write_run_outputs
+from monitor.reporting import build_live_verification_summary, publish_docs, write_run_outputs
 from monitor.utils import configure_logging, ensure_dir, utc_now_iso
 
 CORE_VENDORS = {
@@ -34,11 +34,17 @@ def main() -> None:
     summary = build_live_verification_summary(result, public_site_url)
     outputs = write_run_outputs(base_path, result, summary)
     docs_dir = Path(config.get("defaults", {}).get("docs_dir", "docs"))
-    docs = publish_docs(docs_dir, result, summary, "live_verification", "live-verification", public_site_url)
-    placeholder_full = write_placeholder_site(docs_dir, "full-sweep", "Full sweep path check", "This verification job only probes live vendor reachability. Run the normal full sweep workflow for a complete live shortlist.", public_site_url)
-    placeholder_stock = write_placeholder_site(docs_dir, "stock-monitor", "Stock monitor path check", "This verification job only probes live vendor reachability. Run the stock monitor workflow for watchlist deltas.", public_site_url)
+    docs = publish_docs(
+        docs_dir,
+        result,
+        summary,
+        "live_verification",
+        "live-verification",
+        public_site_url,
+        update_root_index=False,
+    )
     print("Wrote outputs:")
-    for key, value in {**outputs, **docs, "placeholder_full": placeholder_full, "placeholder_stock": placeholder_stock}.items():
+    for key, value in {**outputs, **docs}.items():
         print(f"- {key}: {value}")
     print(f"- production_readiness: {result.production_readiness}")
     print(f"- degraded: {result.degraded}")
