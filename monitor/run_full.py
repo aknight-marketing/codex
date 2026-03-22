@@ -25,16 +25,12 @@ def main() -> None:
     base_path = OUTPUT_DIR / f"full_sweep_{ts}"
     summary = build_full_summary(result)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep", "full-sweep", config.get("defaults", {}).get("pages_site_url", "https://aknight-marketing.github.io/codex/"))
-    save_state(OUTPUT_DIR / "full_sweep_state.json", result.shortlist)
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep")
+    save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
     try:
         maybe_send_email(
-            subject=f"MacBook monitor full sweep: {'BUY NOW' if result.can_recommend_buy_now else 'WAIT'}",
-            body=(f"Generated: {result.generated_at}\n"
-                  f"Trust label: {result.trust_label}\n"
-                  f"Degraded: {result.degraded}\n"
-                  f"Fixture fallback used: {result.fixture_fallback_used}\n"
-                  "Report: full-sweep/index.html"),
+            subject=f"MacBook monitor full sweep: {'BUY NOW' if result.shortlist and result.shortlist[0].buy_now else 'WAIT'}",
+            body=f"Generated: {result.generated_at}\nTop result: {(result.shortlist[0].title + ' ' + str(result.shortlist[0].price_gbp)) if result.shortlist else 'No shortlist results'}\nReport: index.html",
         )
     except Exception as exc:
         print(f"Email notification failed: {exc}")
@@ -43,8 +39,6 @@ def main() -> None:
         print(f"- {key}: {value}")
     print(f"- shortlist: {len(result.shortlist)}")
     print(f"- needs_review: {len(result.needs_review)}")
-    print(f"- degraded: {result.degraded}")
-    print(f"- trust_label: {result.trust_label}")
 
 
 if __name__ == "__main__":

@@ -33,7 +33,6 @@ class Listing:
     availability_text: str | None = None
     stock_evidence: str | None = None
     review_reason: str | None = None
-    review_severity: str | None = None
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -48,14 +47,3 @@ class MonitorResult:
     needs_review: list[Listing]
     vendor_errors: list[dict[str, str]]
     used_test_mode: bool = False
-    degraded: bool = False
-    quality_checks: list[dict[str, Any]] = field(default_factory=list)
-    vendor_stats: list[dict[str, Any]] = field(default_factory=list)
-    run_mode_label: str = "Live mode"
-    fixture_fallback_used: bool = False
-    trust_label: str = "Not trustworthy for buying decisions"
-    browser_mode: str = "urllib"
-    run_health: dict[str, Any] = field(default_factory=dict)
-    live_verification_blocked: bool = False
-    can_recommend_buy_now: bool = False
-    production_readiness: str = "Not ready"

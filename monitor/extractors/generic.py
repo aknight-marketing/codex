@@ -10,7 +10,7 @@ from monitor.utils import clean_whitespace, parse_chip, parse_keyboard, parse_pr
 
 TITLE_RE = re.compile(r"<title[^>]*>(.*?)</title>", re.I | re.S)
 H1_RE = re.compile(r"<h1[^>]*>(.*?)</h1>", re.I | re.S)
-SCRIPT_JSON_RE = re.compile(r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>', re.I | re.S)
+SCRIPT_JSON_RE = re.compile(r"<script[^>]+type=['\"]application/ld\+json['\"][^>]*>(.*?)</script>", re.I | re.S)
 TAG_RE = re.compile(r"<[^>]+>")
 BUY_RE = re.compile(r"add to (?:basket|bag|cart)|buy now|configure options|shop now", re.I)
 NEGATIVE_RE = re.compile(r"sold out|out of stock|unavailable|notify me|pre-?order|archived", re.I)
@@ -24,36 +24,20 @@ def strip_tags(value: str) -> str:
     return clean_whitespace(html.unescape(TAG_RE.sub(" ", value)))
 
 
-def _iter_json_nodes(payload):
-    if isinstance(payload, list):
-        for item in payload:
-            yield from _iter_json_nodes(item)
-        return
-    if not isinstance(payload, dict):
-        return
-    yield payload
-    graph = payload.get("@graph")
-    if isinstance(graph, list):
-        for item in graph:
-            yield from _iter_json_nodes(item)
-
-
-def _type_matches(node: dict, expected: str) -> bool:
-    node_type = node.get("@type")
-    if isinstance(node_type, list):
-        return expected in node_type
-    return node_type == expected
-
-
 def extract_product_json(html_text: str) -> dict:
     for raw in SCRIPT_JSON_RE.findall(html_text):
         try:
             payload = json.loads(html.unescape(raw.strip()))
         except Exception:
             continue
-        for node in _iter_json_nodes(payload):
-            if _type_matches(node, "Product"):
-                return node
+        items = payload if isinstance(payload, list) else [payload]
+        for item in items:
+            if isinstance(item, dict) and item.get("@type") == "Product":
+                return item
+            if isinstance(item, dict) and isinstance(item.get("@graph"), list):
+                for node in item["@graph"]:
+                    if isinstance(node, dict) and node.get("@type") == "Product":
+                        return node
     return {}
 
 
@@ -74,8 +58,6 @@ def title_from_html(html_text: str, product: dict | None = None) -> str:
 
 def stock_from_html(html_text: str, text: str, product: dict | None = None) -> tuple[str | None, str | None, str | None]:
     offers = product.get("offers") if isinstance(product, dict) else None
-    if isinstance(offers, list):
-        offers = next((offer for offer in offers if isinstance(offer, dict)), None)
     if isinstance(offers, dict):
         availability = str(offers.get("availability") or "")
         lower = availability.lower()
@@ -124,8 +106,7 @@ def extract_generic(vendor: dict, url: str, html_text: str, source_url: str, tim
     product = extract_product_json(html_text)
     text = text_content(html_text)
     title = title_from_html(html_text, product)
-    combined = f"{title} {text}".lower()
-    if "macbook pro" not in combined or "14" not in combined:
+    if "macbook pro" not in f"{title} {text}".lower():
         return None
     stock_status, availability_text, stock_evidence = stock_from_html(html_text, text, product)
     if stock_status != "in_stock":

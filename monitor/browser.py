@@ -14,16 +14,6 @@ try:
 except Exception:  # pragma: no cover
     sync_playwright = None
 
-ANTI_BOT_PATTERNS = [
-    "tunnel connection failed",
-    "access denied",
-    "captcha",
-    "cloudflare",
-    "bot",
-]
-DNS_PATTERNS = ["name or service not known", "temporary failure in name resolution", "nodename nor servname"]
-NETWORK_PATTERNS = ["network is unreachable", "connection refused", "connection reset", "remote end closed connection"]
-
 
 @dataclass
 class BrowserConfig:
@@ -31,21 +21,6 @@ class BrowserConfig:
     timeout_ms: int = 30000
     retries: int = 2
     fixture_path: str | None = None
-
-
-def classify_fetch_error(error: Exception | str) -> str:
-    message = str(error).lower()
-    if any(token in message for token in DNS_PATTERNS):
-        return "dns_failure"
-    if any(token in message for token in NETWORK_PATTERNS):
-        return "network_failure"
-    if "timed out" in message or "timeout" in message:
-        return "timeout"
-    if any(token in message for token in ANTI_BOT_PATTERNS):
-        return "anti_bot_or_access_denied"
-    if "http error" in message or "403 forbidden" in message or "404" in message or "500" in message:
-        return "http_error"
-    return "error"
 
 
 class BrowserSession:
@@ -56,10 +31,6 @@ class BrowserSession:
         self.context = None
         self.mode = "urllib"
         self.fixtures = self._load_fixtures(config.fixture_path)
-
-    @property
-    def fixture_fallback_used(self) -> bool:
-        return self.mode == "fixture"
 
     @staticmethod
     def _load_fixtures(path: str | None) -> dict[str, str]:

@@ -8,13 +8,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 from xml.sax.saxutils import escape
-from zipfile import ZIP_DEFLATED, ZipFile
+from zipfile import ZipFile, ZIP_DEFLATED
 
 logger = logging.getLogger(__name__)
 
 PRICE_RE = re.compile(r"(?:£|GBP\s?)([\d,]+(?:\.\d{2})?)", re.I)
-RAM_RE = re.compile(r"(?<![\d.])(\d{2,3})\s?GB(?:\s+(?:unified\s+)?memory|\s+RAM)?(?!\s*(?:SSD|storage|flash|drive))", re.I)
-SCREEN_RE = re.compile(r'(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")', re.I)
+RAM_RE = re.compile(r"(\d{2,3})\s?GB(?:\s+(?:unified\s+)?memory|\s+RAM)?", re.I)
+SCREEN_RE = re.compile(r"(14(?:\.\d)?|16(?:\.\d)?)\s?(?:-?inch|\")", re.I)
 KEYBOARD_RE = re.compile(r"\b(UK|US|ISO|ANSI|QWERTY(?:\s*-?\s*(?:English|UK|US))?)\b", re.I)
 
 
@@ -37,13 +37,7 @@ def parse_price(text: str | None) -> float | None:
 
 def parse_ram_gb(text: str | None) -> int | None:
     values = [int(m.group(1)) for m in RAM_RE.finditer(text or "")]
-    plausible = [value for value in values if value <= 128]
-    preferred = [value for value in plausible if value in {8, 16, 18, 24, 32, 36, 48, 64, 96, 128}]
-    if preferred:
-        return max(preferred)
-    if plausible:
-        return max(plausible)
-    return None
+    return max(values) if values else None
 
 
 def parse_ssd_gb(text: str | None) -> int | None:
@@ -62,8 +56,7 @@ def parse_ssd_gb(text: str | None) -> int | None:
     if not token:
         return None
     token = token.upper().replace(" ", "")
-    value = int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2]))
-    return 1024 if 960 <= value <= 1000 else value
+    return int(float(token[:-2]) * 1024) if token.endswith("TB") else int(float(token[:-2]))
 
 
 def parse_screen_size(text: str | None) -> float | None:
