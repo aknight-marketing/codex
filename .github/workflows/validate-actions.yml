@@ -16,5 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
       - name: Validate workflow YAML and duplicate keys
         run: ruby scripts/validate_workflows.rb
+      - name: Validate monitor reporting and runner contract
+        run: python scripts/validate_monitor_contract.py

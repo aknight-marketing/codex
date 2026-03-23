@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from monitor.config import OUTPUT_DIR, load_config
+from monitor.config import FULL_SWEEP_STATE_PATH, OUTPUT_DIR, load_config
 from monitor.emailer import maybe_send_email
 from monitor.pipeline import run_monitor, save_state
 from monitor.reporting import build_full_summary, publish_docs, write_run_outputs
@@ -25,8 +25,9 @@ def main() -> None:
     base_path = OUTPUT_DIR / f"full_sweep_{ts}"
     summary = build_full_summary(result)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep")
-    save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
+    public_site_url = config.get("defaults", {}).get("pages_site_url", "https://aknight-marketing.github.io/codex/")
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "full_sweep", "full-sweep", public_site_url)
+    save_state(FULL_SWEEP_STATE_PATH, result)
     try:
         maybe_send_email(
             subject=f"MacBook monitor full sweep: {'BUY NOW' if result.shortlist and result.shortlist[0].buy_now else 'WAIT'}",

@@ -8,9 +8,9 @@ Refurbished MacBook Pro monitor focused on UK sellers and 14-inch configurations
 - Uses direct vendor discovery pages first, plus vendor-specific extraction for Apple Certified Refurbished UK, MacFinder, Hoxton Macs, Back Market UK, CeX, and musicMagpie.
 - Validates product pages rather than trusting search/category snippets alone.
 - Excludes listings from the ranked shortlist unless price, chip, RAM, SSD, stock, and 14-inch size are all clearly parsed.
-- Produces JSON, CSV, XLSX, Markdown, and a mobile-friendly static HTML report site.
-- Publishes the latest dashboard and historical snapshots through GitHub Pages.
-- Includes a stock-monitor mode with stateful change detection and optional email notification via SMTP environment variables.
+- Produces JSON, CSV, XLSX, Markdown, and a static HTML report site.
+- Publishes a GitHub Pages report hub plus dedicated section reports for full sweep, stock monitor, and live verification.
+- Includes a stock-monitor mode with explicit state change detection, disappearance tracking, and degraded/parser-failure surfacing.
 
 ## Layout
 
@@ -18,11 +18,11 @@ Refurbished MacBook Pro monitor focused on UK sellers and 14-inch configurations
 - `monitor/run_full.py` — full Saturday sweep
 - `monitor/run_stock_monitor.py` — twice-daily stock monitor
 - `monitor/extractors/` — vendor-specific and generic page extraction
-- `monitor/reporting.py` — JSON/CSV/XLSX/Markdown plus `docs/` HTML publishing
-- `docs/index.html` — latest mobile-friendly dashboard
-- `docs/history/` — archived reports
-- `docs/data/latest.json` — latest machine-readable snapshot
-- `docs/data/history/` — historical JSON snapshots
+- `monitor/reporting.py` — JSON/CSV/XLSX/Markdown plus multi-section `docs/` HTML publishing
+- `docs/index.html` — Pages hub linking the section dashboards
+- `docs/full-sweep/` — latest full sweep dashboard and history
+- `docs/stock-monitor/` — latest stock monitor dashboard and history
+- `docs/live-verification/` — latest production-verification dashboard and history
 
 ## Manual run
 
@@ -32,7 +32,7 @@ Production-style local run:
 - Extracts vendor, title, chip, RAM, SSD, price, stock status, warranty, returns, delivery, keyboard layout, and direct URL where available.
 - Scores listings for spec fit, seller trust, and value.
 - Produces JSON, CSV, XLSX, and Markdown outputs. XLSX files are generated at runtime or in workflow artifacts, but are not committed to the repo to keep PRs text-only.
-- Includes a stock-monitor mode with stateful change detection.
+- Includes a stock-monitor mode with explicit classification of actionable, needs-review, unavailable, parser-failure, and disappeared listings.
 - Ships with GitHub Actions schedules for a Saturday full sweep and twice-daily stock checks.
 
 ## Layout
@@ -61,7 +61,14 @@ python3 -m monitor.run_stock_monitor --test-mode --verbose
 
 ## GitHub Pages publishing
 
-Both scheduled workflows now deploy the generated `docs/` directory to GitHub Pages, so the primary UX is a phone-friendly static report site rather than downloadable artifacts.
+The generated `docs/` directory is structured for GitHub Pages as:
+
+- `/` — report hub
+- `/full-sweep/` — latest full sweep
+- `/stock-monitor/` — latest stock monitor
+- `/live-verification/` — latest live-verification report
+
+Each section publishes a matching machine-readable `data/latest.json`, and the root `docs/data/latest.json` is a manifest of the section outputs.
 
 Expected Pages URL pattern:
 
@@ -92,5 +99,5 @@ If they are not configured, the monitor still works fully via GitHub Pages.
 
 ## Environment note
 
-Offline fixtures are now for **explicit test mode only**. Scheduled and production runs do **not** silently fall back to fixtures; they report failures clearly instead.
-The code prefers Playwright for browser-backed fetching. In restricted environments where outbound browser/network access is blocked, it falls back to a local offline snapshot so the pipeline can still be smoke-tested end to end.
+Offline fixtures are for **explicit test mode only**. Scheduled and production runs do **not** silently fall back to fixtures; they report failures and degraded readiness instead.
+The code prefers Playwright for browser-backed fetching and falls back to `urllib` for live requests if Playwright is unavailable. Fixture HTML is only loaded when `--test-mode` is set.

@@ -74,7 +74,7 @@ def stock_from_html(html_text: str, text: str, product: dict | None = None) -> t
     return None, None, None
 
 
-def build_listing(vendor: dict, url: str, source_url: str, timestamp: str, html_text: str, *, title: str | None = None, text: str | None = None, price: float | None = None, chip: str | None = None, ram_gb: int | None = None, ssd_gb: int | None = None, screen_size_in: float | None = None, stock_status: str | None = None, availability_text: str | None = None, stock_evidence: str | None = None, condition: str | None = None, warranty: str | None = None, returns: str | None = None, delivery_estimate: str | None = None, keyboard_layout: str | None = None) -> Listing:
+def build_listing(vendor: dict, url: str, source_url: str, timestamp: str, html_text: str, *, title: str | None = None, text: str | None = None, price: float | None = None, chip: str | None = None, ram_gb: int | None = None, ssd_gb: int | None = None, screen_size_in: float | None = None, stock_status: str | None = None, availability_text: str | None = None, stock_evidence: str | None = None, condition: str | None = None, warranty: str | None = None, returns: str | None = None, delivery_estimate: str | None = None, keyboard_layout: str | None = None, review_reason: str | None = None, status_label: str | None = None) -> Listing:
     product = extract_product_json(html_text)
     text = text or text_content(html_text)
     title = clean_whitespace(title or title_from_html(html_text, product))
@@ -98,6 +98,8 @@ def build_listing(vendor: dict, url: str, source_url: str, timestamp: str, html_
         source_url=source_url,
         availability_text=availability_text,
         stock_evidence=stock_evidence,
+        review_reason=review_reason,
+        status_label=status_label,
         raw={"domain": urlparse(url).netloc, "product_json_ld": product},
     )
 
@@ -109,6 +111,25 @@ def extract_generic(vendor: dict, url: str, html_text: str, source_url: str, tim
     if "macbook pro" not in f"{title} {text}".lower():
         return None
     stock_status, availability_text, stock_evidence = stock_from_html(html_text, text, product)
-    if stock_status != "in_stock":
-        return None
-    return build_listing(vendor, url, source_url, timestamp, html_text, title=title, text=text, stock_status=stock_status, availability_text=availability_text, stock_evidence=stock_evidence)
+    review_reason = None
+    status_label = None
+    if stock_status == "out_of_stock":
+        review_reason = "out_of_stock"
+        status_label = "out_of_stock"
+    elif stock_status != "in_stock":
+        review_reason = "stock_status_unknown"
+        status_label = "degraded_extraction"
+    return build_listing(
+        vendor,
+        url,
+        source_url,
+        timestamp,
+        html_text,
+        title=title,
+        text=text,
+        stock_status=stock_status,
+        availability_text=availability_text,
+        stock_evidence=stock_evidence,
+        review_reason=review_reason,
+        status_label=status_label,
+    )

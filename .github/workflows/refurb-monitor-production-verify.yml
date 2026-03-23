@@ -30,7 +30,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Restore published docs cache
-        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        if: github.event.inputs.deploy_verification == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor')
         uses: actions/cache/restore@v4
         with:
           path: docs/
@@ -73,11 +73,11 @@ jobs:
           name: refurb-monitor-production-verify-docs
           path: docs/
       - name: Upload Pages artifact
-        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        if: github.event.inputs.deploy_verification == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor')
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
       - name: Deploy to GitHub Pages
-        if: github.event.inputs.deploy_verification == 'true' && github.ref == 'refs/heads/main'
+        if: github.event.inputs.deploy_verification == 'true' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor')
         id: deploy
         uses: actions/deploy-pages@v4
