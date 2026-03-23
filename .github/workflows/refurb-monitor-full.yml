@@ -22,6 +22,14 @@ jobs:
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v5
+      - name: Restore published docs cache
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor'
+        uses: actions/cache/restore@v4
+        with:
+          path: docs/
+          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            refurb-pages-${{ github.ref_name }}-
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
@@ -42,12 +50,18 @@ jobs:
         with:
           name: refurb-monitor-full-docs
           path: docs/
+      - name: Save published docs cache
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor'
+        uses: actions/cache/save@v4
+        with:
+          path: docs/
+          key: refurb-pages-${{ github.ref_name }}-${{ github.run_id }}
       - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/20-macbook-monitor'
         id: deploy
         uses: actions/deploy-pages@v4

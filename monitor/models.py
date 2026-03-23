@@ -33,6 +33,7 @@ class Listing:
     availability_text: str | None = None
     stock_evidence: str | None = None
     review_reason: str | None = None
+    status_label: str | None = None
     raw: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -45,5 +46,12 @@ class MonitorResult:
     mode: str
     shortlist: list[Listing]
     needs_review: list[Listing]
+    unavailable: list[Listing]
     vendor_errors: list[dict[str, str]]
+    vendor_status: list[dict[str, Any]] = field(default_factory=list)
+    state_changes: list[dict[str, Any]] = field(default_factory=list)
     used_test_mode: bool = False
+    degraded: bool = False
+    trust_label: str = "unknown"
+    production_readiness: str = "unknown"
+    readiness_reasons: list[str] = field(default_factory=list)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from monitor.config import OUTPUT_DIR, load_config
+from monitor.config import OUTPUT_DIR, STOCK_STATE_PATH, load_config
 from monitor.emailer import maybe_send_email
 from monitor.pipeline import diff_state, load_state, run_monitor, save_state
 from monitor.reporting import build_stock_monitor_summary, publish_docs, write_run_outputs
@@ -21,14 +21,16 @@ def main() -> None:
     config = load_config(args.config) if args.config else load_config()
     ensure_dir(OUTPUT_DIR)
     result = run_monitor(config, mode="stock", test_mode=args.test_mode, vendor_filter=set(config.get("watchlist_vendors", [])) or None)
-    previous = load_state(OUTPUT_DIR / "latest_state.json")
-    changes = diff_state(previous, result.shortlist)
+    previous = load_state(STOCK_STATE_PATH)
+    changes = diff_state(previous, result)
+    result.state_changes = changes
     ts = utc_now_iso().replace(":", "-")
     base_path = OUTPUT_DIR / f"stock_monitor_{ts}"
     summary = build_stock_monitor_summary(result, changes)
     outputs = write_run_outputs(base_path, result, summary)
-    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor")
-    save_state(OUTPUT_DIR / "latest_state.json", result.shortlist)
+    public_site_url = config.get("defaults", {}).get("pages_site_url", "https://aknight-marketing.github.io/codex/")
+    docs = publish_docs(Path(config.get("defaults", {}).get("docs_dir", "docs")), result, summary, "stock_monitor", "stock-monitor", public_site_url)
+    save_state(STOCK_STATE_PATH, result)
     if changes:
         try:
             maybe_send_email(subject="MacBook monitor stock update", body=f"Generated: {result.generated_at}\nChanges: {len(changes)}\nReport: index.html")
