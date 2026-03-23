@@ -43,11 +43,11 @@ jobs:
           name: refurb-monitor-full-docs
           path: docs/
       - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'|| github.ref == 'refs/heads/20-macbook-monitor'
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main'|| github.ref == 'refs/heads/20-macbook-monitor'
         id: deploy
         uses: actions/deploy-pages@v4
